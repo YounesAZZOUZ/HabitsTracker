@@ -1,12 +1,11 @@
 import connect_db from "@/lib/mongodb";
 import Habit from "@/models/habits";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuth } from "@clerk/nextjs/server"; // ✅ NEW
+import { auth } from "@clerk/nextjs/server"; // ✅ This is the correct one
 
 export async function POST(req) {
   try {
-    const { userId } = getAuth(req); // ✅ use this
+    const { userId } = auth(); // ✅ Correct way in App Router
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -21,10 +20,9 @@ export async function POST(req) {
   }
 }
 
-
 export async function GET(req) {
   try {
-    const { userId } = getAuth(req); // ✅ this supports Bearer tokens from frontend
+    const { userId } = auth(); // ✅ Same fix here
 
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

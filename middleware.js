@@ -1,10 +1,13 @@
 // middleware.js
-import { clerkMiddleware } from "@clerk/nextjs/server"; // ✅ Correct import
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
 export default clerkMiddleware({
-  publicRoutes: ["/", "/sign-in", "/sign-up"], // ✅ Allow unauthenticated access to these
+  publicRoutes: ['/', '/sign-in', '/sign-up'], // Allow public pages
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"], // ✅ Don't apply middleware to static assets
+  matcher: [
+    // Protect all routes except static files
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };
