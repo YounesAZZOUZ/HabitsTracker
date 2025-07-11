@@ -1,6 +1,6 @@
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
-import Navbar from './navbar/page'; // if you have one
+import Navbar from './navbar/page';
 
 export const metadata = {
   title: 'Habit Tracker',

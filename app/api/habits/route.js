@@ -1,36 +1,44 @@
-import connect_db from "@/lib/mongodb";
-import Habit from "@/models/habits";
-import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server"; // ✅ This is the correct one
+import { auth } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import connect_db from '@/lib/mongodb';
+import Habit from '@/models/habits';
 
 export async function POST(req) {
+  const { userId } = auth(); // ✅ Get current user ID
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const { userId } = auth(); // ✅ Correct way in App Router
-
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
     await connect_db();
     const { title, frequency, time } = await req.json();
-    const habit = await Habit.create({ userId, title, frequency, time });
 
-    return NextResponse.json({ message: "created success", habit });
+    const habit = await Habit.create({
+      title,
+      frequency,
+      time,
+      userId, // ✅ Save the habit for this user
+    });
+
+    return NextResponse.json({ message: 'Created', habit });
   } catch (error) {
-    console.error("POST Error:", error);
-    return NextResponse.json({ error: "Failed to post habit" }, { status: 500 });
+    console.error('Error creating habit:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
-export async function GET(req) { 
+export async function GET() {
+  const { userId } = auth(); // ✅ Ensure only their own habits show
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    const { userId } = auth(); // ✅ Same fix here
-
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
     await connect_db();
-    const habits = await Habit.find({ userId });
+    const habits = await Habit.find({ userId }); // ✅ Only user's habits
     return NextResponse.json({ habits });
   } catch (error) {
-    console.error("GET Error:", error);
-    return NextResponse.json({ error: "Failed to get habits" }, { status: 500 });
+    console.error('Error fetching habits:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

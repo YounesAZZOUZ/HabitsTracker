@@ -1,34 +1,45 @@
 'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 export default function AddHabitForm() {
+  const { getToken } = useAuth(); // ✅ Get the token
   const [showTime, setShowTime] = useState(false);
-  const [title, setTitle] = useState("");
-  const [frequency, setFrequency] = useState("");
-  const [time, setTime] = useState("");
+  const [title, setTitle] = useState('');
+  const [frequency, setFrequency] = useState('');
+  const [time, setTime] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("/api/habits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, frequency, time }),
+      const token = await getToken(); // ✅ Get Clerk session token
+
+      const res = await fetch('/api/habits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // ✅ Send token in header
+        },
+        body: JSON.stringify({
+          title,
+          frequency,
+          time,
+        }),
       });
 
       if (res.ok) {
-        alert("Habit created successfully");
-        setTitle("");
-        setFrequency("");
-        setTime("");
+        alert('Habit created!');
+        setTitle('');
+        setFrequency('');
+        setTime('');
+        setShowTime(false);
       } else {
-        const error = await res.json();
-        alert("Error: " + error?.error);
+        const errorText = await res.text();
+        console.error('Failed to create habit:', errorText);
       }
     } catch (error) {
-      console.log(error);
-      alert("Something went wrong");
+      console.log('Submit error:', error);
     }
   };
 
@@ -38,21 +49,19 @@ export default function AddHabitForm() {
         <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
           Add a New Habit
         </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <input
             type="text"
-            value={title}
             placeholder="Enter habit name"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md"
-            required
           />
 
           <select
             value={frequency}
             onChange={(e) => setFrequency(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md"
-            required
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">Select frequency</option>
             <option value="daily">Daily</option>
@@ -68,19 +77,18 @@ export default function AddHabitForm() {
             />
             Must be done at a specific time
           </label>
-
           {showTime && (
             <input
+              type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              type="time"
-              className="px-4 py-2 border border-gray-300 rounded-md"
+              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           )}
 
           <button
             type="submit"
-            className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
           >
             Add Habit
           </button>
