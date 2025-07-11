@@ -1,13 +1,13 @@
 // middleware.js
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { authMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware({
-  publicRoutes: ['/', '/sign-in', '/sign-up'], // Allow public pages
+export default authMiddleware({
+  publicRoutes: ["/", "/sign-in", "/sign-up"], // Add any public routes here
 });
 
 export const config = {
   matcher: [
-    // Protect all routes except static files
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Match all paths except static and API files
+    "/((?!_next/static|_next/image|favicon.ico|api).*)",
   ],
 };
